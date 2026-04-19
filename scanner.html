@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SCANNER | HOOPERS VIBES S2</title>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/html5-qrcode"></script>
+    <style>
+        :root {
+            --orange-hoop: #ff4500;
+            --black-asphalt: #0f0f0f;
+            --white: #ffffff;
+            --success: #2ecc71;
+            --error: #e74c3c;
+        }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background-color: var(--black-asphalt);
+            color: var(--white);
+            margin: 0; padding: 20px;
+            display: flex; flex-direction: column; align-items: center;
+        }
+
+        h1 { font-family: 'Bebas Neue'; color: var(--orange-hoop); font-size: 3rem; margin-bottom: 20px; }
+
+        #reader {
+            width: 100%; max-width: 500px;
+            border: 2px solid var(--orange-hoop) !important;
+            border-radius: 10px; overflow: hidden;
+            background: #000;
+        }
+
+        #result {
+            margin-top: 20px; padding: 30px;
+            border-radius: 10px; width: 100%; max-width: 500px;
+            text-align: center; display: none;
+            animation: slideUp 0.3s ease;
+        }
+
+        .status-valid { background: var(--success); }
+        .status-invalid { background: var(--error); }
+
+        .ticket-info h2 { font-family: 'Bebas Neue'; font-size: 2.5rem; margin: 0; }
+        .ticket-info p { margin: 10px 0; font-weight: bold; font-size: 1.2rem; }
+
+        .btn {
+            margin-top: 20px; padding: 15px 30px;
+            background: white; color: black;
+            border: none; border-radius: 5px;
+            cursor: pointer; font-family: 'Bebas Neue'; font-size: 1.2rem;
+        }
+
+        #auth-box {
+            background: #1a1a1a; padding: 30px; border-radius: 10px;
+            text-align: center; margin-bottom: 20px; border: 1px solid #333;
+        }
+
+        input {
+            padding: 15px; border-radius: 5px; border: 1px solid #333;
+            background: #000; color: white; width: 200px; margin-bottom: 15px;
+        }
+
+        @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+    </style>
+</head>
+<body>
+
+    <h1>SCANNER D'ENTRÉE</h1>
+
+    <div id="auth-box">
+        <p style="margin-bottom: 15px; font-family: 'Bebas Neue';">SÉCURITÉ SCANNER</p>
+        <input type="password" id="scanner-pass" placeholder="Clé Scanner"><br>
+        <button class="btn" onclick="startScanner()" style="background: var(--orange-hoop); color: white;">ACTIVER LA CAMÉRA</button>
+    </div>
+
+    <div id="reader"></div>
+
+    <div id="result">
+        <div id="result-content"></div>
+        <button class="btn" onclick="resetScanner()">SCANNER SUIVANT</button>
+    </div>
+
+    <script>
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxI9CBZ0kuwwDB28FrX48J8o5VJLVRYZjuxH_Qb8EsFXegAlp1Tsxl2ChXOYBzUCP5l/exec";
+        let html5QrCode;
+
+        async function startScanner() {
+            const pass = document.getElementById('scanner-pass').value;
+            if(!pass) return alert("Entrez la clé.");
+            
+            document.getElementById('auth-box').style.display = 'none';
+            html5QrCode = new Html5Qrcode("reader");
+            
+            html5QrCode.start(
+                { facingMode: "environment" }, 
+                { fps: 10, qrbox: 250 },
+                onScanSuccess
+            );
+        }
+
+        async function onScanSuccess(decodedText) {
+            html5QrCode.pause();
+            const pass = document.getElementById('scanner-pass').value;
+            
+            showResult("VÉRIFICATION...", "status-valid");
+
+            try {
+                const response = await fetch(`${SCRIPT_URL}?action=validateTicket&uuid=${decodedText}&key=${pass}`);
+                const result = await response.json();
+
+                if (result.status === "success") {
+                    showResult(`
+                        <div class="ticket-info">
+                            <h2>ACCÈS AUTORISÉ ✅</h2>
+                            <p>${result.data.nom.toUpperCase()}</p>
+                            <p>${result.data.ticketID}</p>
+                            <small>${result.data.type.toUpperCase()}</small>
+                        </div>
+                    `, "status-valid");
+                } else {
+                    showResult(`
+                        <div class="ticket-info">
+                            <h2>ACCÈS REFUSÉ ❌</h2>
+                            <p>${result.message}</p>
+                        </div>
+                    `, "status-invalid");
+                }
+            } catch (e) {
+                showResult("ERREUR RÉSEAU", "status-invalid");
+            }
+        }
+
+        function showResult(html, className) {
+            const resDiv = document.getElementById('result');
+            resDiv.style.display = 'block';
+            resDiv.className = className;
+            document.getElementById('result-content').innerHTML = html;
+        }
+
+        function resetScanner() {
+            document.getElementById('result').style.display = 'none';
+            html5QrCode.resume();
+        }
+    </script>
+</body>
+</html>

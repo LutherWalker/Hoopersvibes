@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HOOPERS VIBES S2 | L'Arène attend</title>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Montserrat:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --orange-hoop: #ff4500;
+            --black-asphalt: #0f0f0f;
+            --dark-gray: #1a1a1a;
+            --white: #ffffff;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; scroll-behavior: smooth; }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background-color: var(--black-asphalt);
+            color: var(--white);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        h1, h2, h3 { font-family: 'Bebas Neue', cursive; letter-spacing: 2px; }
+
+        /* HEADER */
+        header {
+            position: fixed;
+            top: 0; width: 100%;
+            background: rgba(0,0,0,0.9);
+            backdrop-filter: blur(10px);
+            padding: 15px 5%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 1000;
+            border-bottom: 2px solid var(--orange-hoop);
+        }
+
+        .header-logo { height: 45px; }
+        nav a {
+            color: white; text-decoration: none;
+            margin-left: 25px; font-family: 'Bebas Neue';
+            font-size: 1.3rem; transition: 0.3s;
+        }
+        nav a:hover { color: var(--orange-hoop); }
+
+        /* HERO */
+        .hero {
+            height: 100vh;
+            background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.9)),
+            url('https://images.unsplash.com/photo-1504450758481-7338eba7524a?auto=format&fit=crop&q=80&w=1600') center/cover no-repeat;
+            display: flex; flex-direction: column;
+            justify-content: center; align-items: center;
+            text-align: center; padding: 20px;
+        }
+
+        .hero h1 {
+            font-size: clamp(4rem, 12vw, 8rem);
+            color: var(--orange-hoop);
+            text-shadow: 6px 6px 0px #000;
+            margin-bottom: 5px;
+            line-height: 0.9;
+        }
+
+        .hero p { font-size: 1.5rem; font-weight: 900; margin-bottom: 40px; text-transform: uppercase; }
+
+        .cta-button {
+            background-color: var(--orange-hoop);
+            color: white; padding: 20px 50px;
+            text-decoration: none; font-family: 'Bebas Neue';
+            font-size: 2.5rem; border-radius: 0;
+            transition: 0.3s; cursor: pointer; border: none;
+            clip-path: polygon(10% 0, 100% 0, 90% 100%, 0 100%);
+        }
+
+        .cta-button:hover { transform: scale(1.05); background: white; color: var(--orange-hoop); }
+
+        #countdown { margin-top: 20px; font-weight: bold; font-size: 1.2rem; color: var(--orange-hoop); }
+
+        /* CONCEPT */
+        .concept { padding: 100px 5% 60px; text-align: center; }
+        .concept h2 { font-size: 4rem; margin-bottom: 30px; color: var(--orange-hoop); }
+
+        /* GALERIE */
+        .gallery-section {
+            padding: 80px 5%;
+            text-align: center;
+            background: #111;
+        }
+
+        .gallery-section h2 {
+            font-size: 4rem;
+            color: var(--orange-hoop);
+            margin-bottom: 40px;
+        }
+
+        .gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .gallery-item {
+            overflow: hidden;
+            border-radius: 8px;
+            height: 250px;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .gallery-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: 0.5s;
+            filter: grayscale(50%);
+        }
+
+        .gallery-item:hover img {
+            transform: scale(1.1);
+            filter: grayscale(0%);
+        }
+
+        /* PROGRAMME */
+        .schedule {
+            padding: 80px 5%;
+            background: var(--dark-gray);
+            text-align: center;
+        }
+
+        .schedule h2 {
+            font-size: 4rem;
+            color: var(--orange-hoop);
+            margin-bottom: 40px;
+        }
+
+        .timeline {
+            max-width: 600px;
+            margin: 0 auto;
+            text-align: left;
+        }
+
+        .event {
+            margin-bottom: 20px;
+            border-left: 3px solid var(--orange-hoop);
+            padding-left: 20px;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: 0.6s ease;
+        }
+
+        .event.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .event span {
+            color: var(--orange-hoop);
+            font-weight: bold;
+        }
+
+        /* LIGHTBOX */
+        #lightbox {
+            display: none;
+            position: fixed;
+            z-index: 2000;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0,0,0,0.9);
+            justify-content: center;
+            align-items: center;
+        }
+
+        #lightbox img {
+            max-width: 90%;
+            max-height: 80%;
+            border: 3px solid var(--orange-hoop);
+        }
+
+        footer {
+            background: #000;
+            padding: 60px;
+            text-align: center;
+            border-top: 5px solid var(--orange-hoop);
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <img src="images/logo.png" alt="HOOPERS VIBES" class="header-logo">
+        <nav>
+            <a href="#concept">CONCEPT</a>
+            <a href="#galerie">GALERIE</a>
+            <a href="#programme">PLANNING</a>
+            <a href="inscription.html">S'INSCRIRE</a>
+        </nav>
+    </header>
+
+    <section class="hero">
+        <h1>HOOPERS VIBES S2</h1>
+        <p>Le bitume a une âme. L'arène attend la vôtre.</p>
+        <a href="inscription.html" class="cta-button">REJOINDRE L'AVENTURE</a>
+        <p id="countdown"></p>
+    </section>
+
+    <section id="concept" class="concept">
+        <h2>PLUS QU'UN TOURNOI, UNE CULTURE.</h2>
+        <p style="max-width: 800px; margin: 0 auto; color: #ccc; font-size: 1.2rem;">
+            Après le succès explosif de la première édition, HOOPERS VIBES revient.
+            Préparez-vous pour une journée de basket pur, de beats hip-hop et de rivalités légendaires.
+        </p>
+    </section>
+
+    <section id="galerie" class="gallery-section">
+        <h2>SOUVENIRS DE LA SAISON 1</h2>
+        <div class="gallery-grid">
+            <div class="gallery-item" onclick="openLightbox(this)">
+                <img src="hvs11.jpeg" alt="Saison 1 Action">
+            </div>
+            <div class="gallery-item" onclick="openLightbox(this)">
+                <img src="hvs17.jpeg" alt="Saison 1 Dunk">
+            </div>
+            <div class="gallery-item" onclick="openLightbox(this)">
+                <img src="hvs13.jpeg" alt="Saison 1 Public">
+            </div>
+            <div class="gallery-item" onclick="openLightbox(this)">
+                <img src="hvs18.jpeg" alt="Saison 1 Match">
+            </div>
+            <div class="gallery-item" onclick="openLightbox(this)">
+                <img src="hvs16.jpeg" alt="Saison 1 Trophée">
+            </div>
+            <div class="gallery-item" onclick="openLightbox(this)">
+                <img src="hvs12.jpeg" alt="Saison 1 Match">
+            </div>
+            <div class="gallery-item" onclick="openLightbox(this)">
+                <img src="hvs14.jpeg" alt="Saison 1 Trophée">
+            </div>
+
+        </div>
+    </section>
+
+    <section id="programme" class="schedule">
+        <h2>LE PLANNING</h2>
+        <div class="timeline">
+            <div class="event"><span>09:00</span> - Accueil & arrivée des hoopers</div>
+            <div class="event"><span>10:30</span> - Début des activités</div>
+            <div class="event"><span>14:00</span> - Concours de Dunk (Showcase)</div>
+            <div class="event"><span>17:30</span> - Grande Finale S2</div>
+            <div class="event"><span>19:00</span> - Remise des prix & DJ Set</div>
+        </div>
+    </section>
+
+    <div id="lightbox" onclick="this.style.display='none'">
+        <img id="lightbox-img" src="">
+    </div>
+
+    <footer>
+        <p>&copy; 2026 HOOPERS VIBES S2 — Tous droits réservés | Développé par Trésor Mbe</p>
+    </footer>
+
+    <script>
+        function openLightbox(element) {
+            const src = element.querySelector('img').src;
+            document.getElementById('lightbox-img').src = src;
+            document.getElementById('lightbox').style.display = 'flex';
+        }
+
+        // Animation scroll pour la timeline
+        const events = document.querySelectorAll('.event');
+        const observer = new IntersectionObserver(entries => {
+            entries.forEach(entry => {
+                if(entry.isIntersecting){
+                    entry.target.classList.add('visible');
+                }
+            });
+        }, { threshold: 0.5 });
+
+        events.forEach(el => observer.observe(el));
+
+        // Countdown
+        const eventDate = new Date("june 20, 2026 09:00:00").getTime();
+        const timer = setInterval(function() {
+            const now = new Date().getTime();
+            const distance = eventDate - now;
+            const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            document.getElementById("countdown").innerHTML = "L'événement commence dans " + days + "j " + hours + "h";
+            if (distance < 0) {
+                clearInterval(timer);
+                document.getElementById("countdown").innerHTML = "C'EST PARTI 🔥";
+            }
+        }, 1000);
+    </script>
+</body>
+</html>

@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>INSCRIPTION | HOOPERS VIBES S2</title>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Montserrat:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --orange-hoop: #ff4500;
+            --black-asphalt: #0f0f0f;
+            --dark-gray: #1a1a1a;
+            --white: #ffffff;
+            --gold: #ffd700;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; scroll-behavior: smooth; }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background-color: var(--black-asphalt);
+            color: var(--white);
+            line-height: 1.6;
+            padding-top: 80px;
+        }
+
+        h1, h2, h3 { font-family: 'Bebas Neue', cursive; letter-spacing: 2px; }
+
+        /* HEADER */
+        header {
+            position: fixed;
+            top: 0; width: 100%;
+            background: rgba(0,0,0,0.9);
+            backdrop-filter: blur(10px);
+            padding: 15px 5%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 1000;
+            border-bottom: 2px solid var(--orange-hoop);
+        }
+
+        .header-logo { height: 45px; }
+        nav a {
+            color: white; text-decoration: none;
+            margin-left: 25px; font-family: 'Bebas Neue';
+            font-size: 1.3rem; transition: 0.3s;
+        }
+        nav a:hover { color: var(--orange-hoop); }
+
+        /* SECTIONS */
+        .section-title { font-size: 4rem; text-align: center; margin-bottom: 50px; color: var(--orange-hoop); padding-top: 40px; }
+        
+        /* COMPETITIONS */
+        .comp-grid {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px; padding: 20px 5% 80px;
+        }
+
+        .comp-card {
+            background: var(--dark-gray);
+            border-left: 5px solid var(--orange-hoop);
+            padding: 30px; transition: 0.4s;
+        }
+        .comp-card:hover { background: #252525; transform: translateX(10px); }
+        .comp-card h3 { font-size: 2.5rem; margin-bottom: 10px; }
+        .comp-card .price { color: var(--orange-hoop); font-weight: 900; font-size: 1.5rem; margin-bottom: 20px; }
+        .btn-small {
+            display: inline-block; padding: 10px 20px;
+            background: var(--orange-hoop); color: white;
+            text-decoration: none; font-family: 'Bebas Neue'; font-size: 1.2rem;
+        }
+
+        /* TICKETS */
+        .tickets-section { background: #111; padding: 80px 5%; }
+        .tickets-grid {
+            display: flex; justify-content: center; gap: 30px; flex-wrap: wrap;
+        }
+
+        .ticket-card {
+            background: var(--dark-gray);
+            width: 350px; padding: 40px;
+            border: 2px solid #333; text-align: center;
+            transition: 0.4s; position: relative;
+        }
+
+        .ticket-card.vip { border-color: var(--gold); transform: scale(1.05); z-index: 2; }
+        .ticket-card.vip::before {
+            content: "RECOMMANDÉ / RARE"; position: absolute; top: -15px; left: 50%;
+            transform: translateX(-50%); background: var(--gold); color: black;
+            padding: 5px 15px; font-weight: 900; font-size: 0.8rem;
+        }
+
+        .ticket-card h3 { font-size: 3rem; margin-bottom: 10px; }
+        .ticket-card .price { font-size: 2.5rem; color: var(--orange-hoop); margin-bottom: 30px; }
+        .ticket-card ul { list-style: none; margin-bottom: 30px; text-align: left; }
+        .ticket-card li { margin-bottom: 10px; font-size: 0.9rem; }
+        .ticket-card li::before { content: "✔ "; color: var(--orange-hoop); }
+
+        .vip-limit { color: var(--gold); font-size: 0.8rem; margin-top: 10px; font-weight: bold; }
+
+        .cta-button {
+            background-color: var(--orange-hoop);
+            color: white; padding: 15px 30px;
+            text-decoration: none; font-family: 'Bebas Neue';
+            font-size: 1.8rem; border-radius: 0;
+            transition: 0.3s; cursor: pointer; border: none;
+            display: inline-block;
+        }
+        .cta-button:hover { transform: scale(1.05); background: white; color: var(--orange-hoop); }
+
+        footer {
+            background: #000; padding: 60px; text-align: center;
+            border-top: 5px solid var(--orange-hoop);
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <img src="images/logo.png" alt="HOOPERS VIBES" class="header-logo">
+        <nav>
+            <a href="index.html">ACCUEIL</a>
+            <a href="#competitions">COMPÉTITIONS</a>
+            <a href="#tickets">BILLETS</a>
+        </nav>
+    </header>
+
+    <section id="competitions">
+        <h2 class="section-title">INSCRIPTION COMPÉTITIONS</h2>
+        <div class="comp-grid">
+            <div class="comp-card">
+                <h3>DUNK CONTEST</h3>
+                <p class="price">3000 FCFA</p>
+                <p>Le show ultime. Défie la gravité devant les juges.</p><br>
+                <a href="formulaire.html?type=player&comp=dunk" class="btn-small">S'INSCRIRE</a>
+            </div>
+            <div class="comp-card">
+                <h3>3PTS CONTEST</h3>
+                <p class="price">3000 FCFA</p>
+                <p>Sniper ? Prouve que tu es le plus adroit derrière l'arc.</p><br>
+                <a href="formulaire.html?type=player&comp=3pts" class="btn-small">S'INSCRIRE</a>
+            </div>
+            <div class="comp-card">
+                <h3>1v1 CONTEST</h3>
+                <p class="price">3000 FCFA</p>
+                <p>Pas d'aide. Juste toi, ton défenseur et le panier.</p><br>
+                <a href="formulaire.html?type=player&comp=1v1" class="btn-small">S'INSCRIRE</a>
+            </div>
+            <div class="comp-card">
+                <h3>3v3 CONTEST</h3>
+                <p class="price">3000 FCFA / Joueur</p>
+                <p>L'essence du streetball. Équipe de 5 joueurs max.</p><br>
+                <a href="formulaire.html?type=player&comp=3v3" class="btn-small">S'INSCRIRE</a>
+            </div>
+            <div class="comp-card">
+                <h3>SKILLS CHALLENGE</h3>
+                <p class="price">3000 FCFA</p>
+                <p>Vitesse, dribble, passe. Le joueur le plus complet gagne.</p><br>
+                <a href="formulaire.html?type=player&comp=skills" class="btn-small">S'INSCRIRE</a>
+            </div>
+        </div>
+    </section>
+
+    <section id="tickets" class="tickets-section">
+        <h2 class="section-title">BILLETS SPECTATEURS</h2>
+        <div class="tickets-grid">
+            <div class="ticket-card">
+                <h3>STANDARD</h3>
+                <p class="price">3000 FCFA</p>
+                <ul>
+                    <li>Accès standard à l'événement</li>
+                    <li>1 jeu de distraction inclus</li>
+                </ul>
+                <a href="formulaire.html?type=guest&pass=standard" class="cta-button">RÉSERVER</a>
+            </div>
+
+            <div class="ticket-card vip">
+                <h3>VIP + TOMBOLA</h3>
+                <p class="price">4500 FCFA</p>
+                <ul>
+                    <li>Accès VIP exclusif</li>
+                    <li>Participation à la Tombola</li>
+                    <li>1 match E-sport offert</li>
+                    <li>Nourriture & Eau incluses</li>
+                    <li>1 tour de jeu de distraction</li>
+                </ul>
+                <a href="formulaire.html?type=guest&pass=vip_tombola" class="cta-button" style="background: var(--gold); color: black;">PRENDRE LE MEILLEUR PACK</a>
+                <p class="vip-limit" id="vip-status">CHARGEMENT DES PLACES...</p>
+            </div>
+
+            <div class="ticket-card">
+                <h3>VIP</h3>
+                <p class="price">3500 FCFA</p>
+                <ul>
+                    <li>Accès VIP exclusif</li>
+                    <li>1 match E-sport</li>
+                    <li>Nourriture & Eau</li>
+                    <li>1 tour de jeu de distraction</li>
+                </ul>
+                <a href="formulaire.html?type=guest&pass=vip" class="cta-button">RÉSERVER</a>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <p>&copy; 2026 HOOPERS VIBES S2 — Tous droits réservés | Développé par Trésor Mbe</p>
+    </footer>
+
+    <script>
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxI9CBZ0kuwwDB28FrX48J8o5VJLVRYZjuxH_Qb8EsFXegAlp1Tsxl2ChXOYBzUCP5l/exec";
+        async function checkVip() {
+            try {
+                const res = await fetch(SCRIPT_URL + "?action=getVipCount");
+                const data = await res.json();
+                const remaining = data.limit - data.count;
+                document.getElementById('vip-status').innerText = `PLUS QUE ${remaining} PLACES VIP DISPONIBLES !`;
+                if (remaining <= 0) {
+                    document.getElementById('vip-status').innerText = "SOLD OUT !";
+                    document.getElementById('vip-status').style.color = "red";
+                }
+            } catch (e) {
+                document.getElementById('vip-status').innerText = "PLACES LIMITÉES - RÉSERVE VITE !";
+            }
+        }
+        checkVip();
+    </script>
+</body>
+</html>
