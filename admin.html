@@ -3,8 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ADMIN HOOPERS S2 | Final Version</title>
+    <title>ADMIN HOOPERS S2 | Final Pro</title>
     <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
+    <!-- Librairie pour transformer le HTML en Image -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
         :root {
             --orange-hoop: #ff4500;
@@ -18,31 +20,28 @@
         body { font-family: 'Montserrat', sans-serif; background: var(--black-asphalt); color: var(--white); display: flex; min-height: 100vh; overflow-x: hidden; }
 
         /* Login Overlay */
-        #login-overlay { position: fixed; inset: 0; background: var(--black-asphalt); display: flex; justify-content: center; align-items: center; z-index: 2000; }
+        #login-overlay { position: fixed; inset: 0; background: var(--black-asphalt); display: flex; justify-content: center; align-items: center; z-index: 4000; }
         .login-card { background: var(--dark-gray); padding: 40px; border: 2px solid var(--orange-hoop); text-align: center; width: 90%; max-width: 380px; }
         .login-card h1 { font-family: 'Bebas Neue'; font-size: 3rem; color: var(--orange-hoop); margin-bottom: 20px; }
-        input[type="password"] { width: 100%; padding: 15px; background: #222; border: 1px solid #333; color: white; margin-bottom: 20px; font-size: 1rem; }
+        input[type="password"] { width: 100%; padding: 15px; background: #222; border: 1px solid #333; color: white; margin-bottom: 20px; font-size: 1rem; text-align: center; }
 
-        /* Sidebar & Overlay */
-        .sidebar-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 998; display: none; opacity: 0; transition: 0.3s; }
-        .sidebar-overlay.active { display: block; opacity: 1; }
-        
+        /* Sidebar & Navigation */
         .sidebar {
             width: var(--sidebar-width); height: 100vh; background: #000; padding: 30px 20px; border-right: 1px solid #333; 
             position: fixed; left: 0; top: 0; transform: translateX(-100%); transition: transform 0.4s; z-index: 1000;
         }
         .sidebar.open { transform: translateX(0); }
         .sidebar h2 { font-family: 'Bebas Neue'; color: var(--orange-hoop); margin-bottom: 40px; font-size: 2rem; }
-        .nav-item { padding: 15px; color: #aaa; text-decoration: none; display: block; font-family: 'Bebas Neue'; font-size: 1.2rem; transition: 0.3s; }
+        .nav-item { padding: 15px; color: #aaa; text-decoration: none; display: block; font-family: 'Bebas Neue'; font-size: 1.2rem; transition: 0.3s; margin-bottom: 5px; border-radius: 4px; }
         .nav-item:hover, .nav-item.active { color: white; background: var(--orange-hoop); }
+        .sidebar-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 998; display: none; }
+        .sidebar-overlay.active { display: block; }
 
-        /* Bouton Menu */
+        /* UI Elements */
         .menu-toggle { position: fixed; left: 15px; top: 15px; z-index: 999; background: var(--orange-hoop); border: none; color: white; width: 45px; height: 45px; border-radius: 5px; cursor: pointer; font-size: 1.2rem; }
-
-        /* Main Content */
-        .main-content { flex: 1; padding: 70px 15px 40px; width: 100%; }
+        .main-content { flex: 1; padding: 70px 15px 40px; width: 100%; max-width: 1200px; margin: 0 auto; display: none; }
         .header-main { margin-bottom: 30px; text-align: center; }
-        .header-main h1 { font-family: 'Bebas Neue'; font-size: 2.5rem; margin-bottom: 15px; }
+        .header-main h1 { font-family: 'Bebas Neue'; font-size: 2.5rem; }
 
         /* Stats Grid */
         .stats-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 25px; }
@@ -50,69 +49,82 @@
         .stat-card h3 { font-size: 0.7rem; color: #888; text-transform: uppercase; margin-bottom: 5px; }
         .stat-card p { font-family: 'Bebas Neue'; font-size: 1.8rem; color: var(--orange-hoop); }
 
-        /* Recherche */
+        /* Search */
         .search-container { margin-bottom: 20px; position: relative; }
         .search-container input { width: 100%; padding: 15px 15px 15px 45px; background: var(--dark-gray); border: 1px solid #333; border-radius: 8px; color: white; font-size: 1rem; outline: none; }
-        .search-container input:focus { border-color: var(--orange-hoop); }
         .search-icon { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: #666; }
 
-        /* Table View */
-        .table-wrapper { width: 100%; }
-        table { width: 100%; border-collapse: collapse; background: var(--dark-gray); border-radius: 8px; overflow: hidden; }
-        th { background: #222; padding: 15px; text-align: left; font-family: 'Bebas Neue'; color: var(--orange-hoop); }
+        /* Table */
+        .table-wrapper { background: var(--dark-gray); border-radius: 8px; overflow: hidden; }
+        table { width: 100%; border-collapse: collapse; }
+        th { background: #222; padding: 15px; text-align: left; font-family: 'Bebas Neue'; color: var(--orange-hoop); font-weight: normal; letter-spacing: 1px; }
         td { padding: 15px; border-bottom: 1px solid #222; font-size: 0.9rem; }
 
-        /* Mobile Adjustments */
-        @media (max-width: 768px) {
-            table, thead, tbody, th, td, tr { display: block; }
-            thead { display: none; }
-            tr { background: var(--dark-gray); margin-bottom: 15px; border-radius: 8px; padding: 15px; border: 1px solid #333; }
-            td { border: none; padding: 8px 0; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #222; }
-            td:last-child { border-bottom: none; flex-direction: column; gap: 10px; padding-top: 15px; }
-            .mobile-label { font-weight: bold; color: var(--orange-hoop); font-size: 0.7rem; text-transform: uppercase; }
-        }
+        /* Modal Ticket */
+        #ticket-modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 3000; justify-content: center; align-items: center; padding: 20px; flex-direction: column; }
+        .ticket-box { background: #fff; color: #000; padding: 30px; text-align: center; width: 100%; max-width: 350px; border-radius: 15px; box-shadow: 0 10px 40px rgba(0,0,0,0.8); }
+        #qr-display { margin: 15px 0; display: flex; justify-content: center; }
+        #qr-display img { width: 180px; height: 180px; }
+        .ticket-footer { margin-top: 15px; border-top: 1px dashed #ccc; padding-top: 10px; font-size: 0.7rem; color: #666; text-transform: uppercase; }
 
         /* Badges & Buttons */
         .badge { padding: 4px 10px; border-radius: 20px; font-size: 0.7rem; font-weight: bold; }
         .badge-paid { background: #2ecc71; color: white; }
         .badge-unpaid { background: #e67e22; color: white; }
-        .btn { padding: 10px 15px; border: none; cursor: pointer; font-family: 'Bebas Neue'; font-size: 1rem; border-radius: 5px; transition: 0.3s; width: 100%; }
+        
+        .btn { padding: 12px 15px; border: none; cursor: pointer; font-family: 'Bebas Neue'; font-size: 1rem; border-radius: 5px; transition: 0.2s; width: 100%; letter-spacing: 1px; }
         .btn-validate { background: #2ecc71; color: white; }
         .btn-ticket { background: #3498db; color: white; }
         .btn-whatsapp { background: #25d366; color: white; }
         .btn-delete { background: #e74c3c; color: white; }
-        .action-group { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; width: 100%; }
+        .btn-share { background: #8e44ad; color: white; }
+        
+        .action-group { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px; }
+        .modal-buttons { width: 100%; max-width: 350px; margin-top: 20px; display: grid; gap: 10px; }
 
-        /* Modal Ticket */
-        #ticket-modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 3000; justify-content: center; align-items: center; padding: 20px; }
-        .ticket-box { background: #fff; color: #000; padding: 25px; text-align: center; max-width: 350px; width: 100%; border-radius: 15px; }
-        #qr-display { margin: 15px 0; }
-        #loading { position: fixed; top: 15px; right: 15px; background: var(--orange-hoop); padding: 8px 15px; display: none; z-index: 3000; font-weight: bold; }
+        #loading { position: fixed; top: 15px; right: 15px; background: var(--orange-hoop); color: white; padding: 10px 20px; display: none; z-index: 5000; font-weight: bold; border-radius: 4px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .stats-grid { grid-template-columns: repeat(2, 1fr); }
+            thead { display: none; }
+            tr { display: block; background: var(--dark-gray); margin-bottom: 15px; border: 1px solid #333; border-radius: 8px; padding: 15px; }
+            td { display: flex; justify-content: space-between; align-items: center; border: none; padding: 8px 0; border-bottom: 1px solid #222; }
+            td:last-child { display: block; border: none; padding-top: 15px; }
+            .mobile-label { font-weight: bold; color: var(--orange-hoop); font-size: 0.7rem; text-transform: uppercase; }
+        }
     </style>
 </head>
 <body>
 
+    <!-- AUTHENTICATION -->
     <div id="login-overlay">
         <div class="login-card">
             <h1>ADMIN S2</h1>
-            <input type="password" id="admin-pass" placeholder="Mot de passe">
-            <button class="btn btn-validate" onclick="checkAuth()">CONNEXION</button>
+            <input type="password" id="admin-pass" placeholder="CODE D'ACCÈS">
+            <button class="btn btn-validate" onclick="checkAuth()">ENTRER</button>
         </div>
     </div>
 
-    <div id="ticket-modal" onclick="this.style.display='none'">
-        <div class="ticket-box" onclick="event.stopPropagation()">
+    <!-- TICKET MODAL -->
+    <div id="ticket-modal">
+        <div class="ticket-box" id="ticket-to-export">
             <h2 style="font-family:'Bebas Neue';color:var(--orange-hoop);font-size:2.2rem;">HOOPERS VIBES S2</h2>
             <div id="qr-display"></div>
-            <h3 id="t-id" style="font-family:'Bebas Neue';font-size:1.8rem;"></h3>
-            <p id="t-name" style="font-weight:bold;margin:5px 0;"></p>
-            <p id="t-detail" style="font-size:0.9rem;"></p>
-            <p style="font-size:0.7rem;color:#666;margin:15px 0;">Capturez l'écran pour envoyer !</p>
+            <h3 id="t-id" style="font-family:'Bebas Neue';font-size:1.8rem; letter-spacing:1px;"></h3>
+            <p id="t-name" style="font-weight:700; font-size:1.1rem; margin:5px 0;"></p>
+            <p id="t-detail" style="font-size:0.9rem; color:#444;"></p>
+            <div class="ticket-footer">Pass officiel - Hoopers Vibes 2026</div>
+        </div>
+        
+        <div class="modal-buttons">
+            <button class="btn btn-validate" onclick="downloadTicket()">TÉLÉCHARGER (PNG)</button>
+            <button id="share-btn" class="btn btn-share" style="display:none;" onclick="shareTicket()">PARTAGER DIRECTEMENT</button>
             <button class="btn btn-delete" onclick="document.getElementById('ticket-modal').style.display='none'">FERMER</button>
         </div>
     </div>
 
-    <div id="loading">TRAITEMENT...</div>
+    <div id="loading">TRAITEMENT EN COURS...</div>
 
     <button class="menu-toggle" onclick="toggleSidebar()">☰</button>
     <div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleSidebar()"></div>
@@ -121,34 +133,35 @@
         <h2>HOOPERS VIBES</h2>
         <a href="#" class="nav-item active">DASHBOARD</a>
         <a href="scanner.html" class="nav-item">SCANNER QR</a>
-        <a href="index.html" class="nav-item">VOIR LE SITE</a>
+        <a href="index.html" class="nav-item">RETOUR SITE</a>
         <div style="position: absolute; bottom: 30px; left: 20px; width: calc(100% - 40px);">
             <button class="btn btn-delete" onclick="logout()">DÉCONNEXION</button>
         </div>
     </aside>
 
-    <main class="main-content">
+    <main class="main-content" id="main-ui">
         <div class="header-main">
-            <h1>DASHBOARD</h1>
-            <button class="btn btn-validate" style="width:auto;padding:10px 20px;" onclick="loadData()">ACTUALISER</button>
+            <h1>DASHBOARD ADMIN</h1>
+            <p id="last-update" style="font-size: 0.8rem; color: #666; margin-top: 5px;"></p>
+            <button class="btn btn-validate" style="width:auto; margin-top:15px; padding:8px 25px;" onclick="loadData()">ACTUALISER</button>
         </div>
 
         <div class="stats-grid">
-            <div class="stat-card"><h3>TOTAL</h3><p id="stat-total">0</p></div>
-            <div class="stat-card"><h3>PAYÉS</h3><p id="stat-paid">0</p></div>
-            <div class="stat-card"><h3>VISITEURS</h3><p id="stat-guests">0</p></div>
-            <div class="stat-card"><h3>CA (FCFA)</h3><p id="stat-ca">0</p></div>
+            <div class="stat-card"><h3>Total inscrits</h3><p id="stat-total">0</p></div>
+            <div class="stat-card"><h3>Déjà payés</h3><p id="stat-paid">0</p></div>
+            <div class="stat-card"><h3>Spectateurs</h3><p id="stat-guests">0</p></div>
+            <div class="stat-card"><h3>Recettes (CFA)</h3><p id="stat-ca">0</p></div>
         </div>
 
         <div class="search-container">
             <span class="search-icon">🔍</span>
-            <input type="text" id="search-input" placeholder="Chercher un nom, téléphone ou ID..." oninput="filterData()">
+            <input type="text" id="search-input" placeholder="Nom, Téléphone ou ID..." oninput="filterData()">
         </div>
 
         <div class="table-wrapper">
             <table>
                 <thead>
-                    <tr><th>Participant</th><th>Type</th><th>Détails</th><th>Statut</th><th>Actions</th></tr>
+                    <tr><th>Participant</th><th>Catégorie</th><th>Détails</th><th>Statut</th><th>Actions</th></tr>
                 </thead>
                 <tbody id="table-body"></tbody>
             </table>
@@ -156,7 +169,7 @@
     </main>
 
     <script>
-        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxI9CBZ0kuwwDB28FrX48J8o5VJLVRYZjuxH_Qb8EsFXegAlp1Tsxl2ChXOYBzUCP5l/exec";
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwvhSuhlGrxyF5VDFm6qlXmj8uWTeW3wHkDRJJ7setvoglQKELbznAdgbwwQ7M9Oj5v/exec";
         let rawData = [];
 
         function toggleSidebar() {
@@ -164,22 +177,38 @@
             document.getElementById('sidebar-overlay').classList.toggle('active');
         }
 
-        function checkAuth() { sessionStorage.setItem('hv_admin_key', document.getElementById('admin-pass').value); loadData(); }
+        function checkAuth() { 
+            const pass = document.getElementById('admin-pass').value;
+            if(!pass) return alert("Entrez le code");
+            sessionStorage.setItem('hv_admin_key', pass); 
+            loadData(); 
+        }
+        
         function logout() { sessionStorage.removeItem('hv_admin_key'); location.reload(); }
 
         async function loadData() {
-            const key = sessionStorage.getItem('hv_admin_key'); if (!key) return;
-            document.getElementById('loading').style.display = 'block';
+            const key = sessionStorage.getItem('hv_admin_key'); 
+            if (!key) return;
+            
+            showLoader("CHARGEMENT DES DONNÉES...");
             try {
                 const res = await fetch(`${SCRIPT_URL}?action=getData&key=${key}`);
                 const result = await res.json();
+                
                 if (result.status === "success") {
                     document.getElementById('login-overlay').style.display = 'none';
+                    document.getElementById('main-ui').style.display = 'block';
                     rawData = result.data;
-                    renderDashboard(result.data);
-                } else { alert("Accès refusé."); logout(); }
-            } catch (e) { alert("Erreur serveur."); }
-            document.getElementById('loading').style.display = 'none';
+                    renderDashboard(rawData);
+                    document.getElementById('last-update').innerText = "Mis à jour à " + new Date().toLocaleTimeString();
+                } else { 
+                    alert("Accès refusé : Code incorrect."); 
+                    logout(); 
+                }
+            } catch (e) { 
+                alert("Erreur de connexion au serveur."); 
+            }
+            hideLoader();
         }
 
         function renderDashboard(data) {
@@ -187,27 +216,35 @@
             tbody.innerHTML = '';
             let paidCount = 0; let ca = 0; let guests = 0;
             
-            data.forEach(item => {
+            // Tri : Non-payés en premier
+            const sortedData = [...data].sort((a,b) => {
+                const aP = (a.paid === true || a.paid === "true");
+                const bP = (b.paid === true || b.paid === "true");
+                return aP - bP;
+            });
+
+            sortedData.forEach(item => {
                 const isPaid = (item.paid === true || item.paid === "true");
                 if (isPaid) { paidCount++; ca += parseInt(item.montant || 0); }
-                if (item.type !== 'player') guests++;
+                if (item.type?.toLowerCase() !== 'player') guests++;
 
                 const row = document.createElement('tr');
                 row.innerHTML = `
                     <td><span class="mobile-label">Nom</span><div><b>${item.nom}</b><br><small>${item.phone}</small></div></td>
-                    <td><span class="mobile-label">Type</span><span class="badge">${(item.type||'').toUpperCase()}</span></td>
+                    <td><span class="mobile-label">Type</span><span class="badge" style="background:#444; color:white;">${(item.type||'').toUpperCase()}</span></td>
                     <td><span class="mobile-label">Détails</span>${item.competition || item.passtype || '-'}</td>
-                    <td><span class="mobile-label">Statut</span><span class="badge ${isPaid ? 'badge-paid' : 'badge-unpaid'}">${isPaid ? 'PAYÉ' : 'ATTENTE'}</span></td>
+                    <td><span class="mobile-label">Statut</span><span class="badge ${isPaid ? 'badge-paid' : 'badge-unpaid'}">${isPaid ? 'PAYÉ' : 'EN ATTENTE'}</span></td>
                     <td>
                         <div class="action-group">
                             <button class="btn btn-ticket" onclick="showTicket('${item.uuid}', '${item.ticketid}', '${item.nom}', '${item.competition || item.passtype}')">TICKET</button>
                             <button class="btn btn-whatsapp" onclick="sendWhatsApp('${item.phone}', '${item.nom}')">WA</button>
                         </div>
-                        ${!isPaid ? `<button class="btn btn-validate" style="margin-top:8px;" onclick="markAsPaid('${item.uuid}')">VALIDER PAIEMENT</button>` : ''}
+                        ${!isPaid ? `<button class="btn btn-validate" onclick="markAsPaid('${item.uuid}')">VALIDER LE PAIEMENT</button>` : ''}
                     </td>
                 `;
                 tbody.appendChild(row);
             });
+
             document.getElementById('stat-total').innerText = data.length;
             document.getElementById('stat-paid').innerText = paidCount;
             document.getElementById('stat-guests').innerText = guests;
@@ -226,29 +263,69 @@
 
         function showTicket(uuid, id, nom, detail) {
             const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${uuid}`;
-            document.getElementById('qr-display').innerHTML = `<img src="${qrUrl}" width="180">`;
-            document.getElementById('t-id').innerText = id || 'HV-XXXXX';
-            document.getElementById('t-name').innerText = nom || 'Inconnu';
-            document.getElementById('t-detail').innerText = detail || '-';
+            document.getElementById('qr-display').innerHTML = `<img src="${qrUrl}" alt="QR Code">`;
+            document.getElementById('t-id').innerText = id || 'HV-PENDING';
+            document.getElementById('t-name').innerText = nom;
+            document.getElementById('t-detail').innerText = detail;
             document.getElementById('ticket-modal').style.display = 'flex';
+            
+            // Afficher bouton partage si mobile compatible
+            if (navigator.share) { document.getElementById('share-btn').style.display = 'block'; }
+        }
+
+        async function downloadTicket() {
+            const ticket = document.getElementById('ticket-to-export');
+            const name = document.getElementById('t-name').innerText;
+            showLoader("CRÉATION DU TICKET...");
+            
+            try {
+                const canvas = await html2canvas(ticket, { scale: 2, backgroundColor: "#ffffff", useCORS: true });
+                const link = document.createElement('a');
+                link.download = `Ticket_Hoopers_${name.replace(/\s+/g, '_')}.png`;
+                link.href = canvas.toDataURL("image/png");
+                link.click();
+            } catch (e) { alert("Erreur lors de la génération."); }
+            hideLoader();
+        }
+
+        async function shareTicket() {
+            const ticket = document.getElementById('ticket-to-export');
+            const canvas = await html2canvas(ticket, { scale: 2, backgroundColor: "#ffffff", useCORS: true });
+            canvas.toBlob(async (blob) => {
+                const file = new File([blob], 'ticket.png', { type: 'image/png' });
+                try {
+                    await navigator.share({ files: [file], title: 'Ticket Hoopers Vibes' });
+                } catch (e) { console.log("Partage annulé"); }
+            });
         }
 
         async function markAsPaid(uuid) {
-            if (!confirm("Confirmer le paiement ?")) return;
+            if (!confirm("Confirmer la réception du paiement ?\nCeci enverra le ticket par email automatiquement.")) return;
             const key = sessionStorage.getItem('hv_admin_key');
-            document.getElementById('loading').style.display = 'block';
+            showLoader("VALIDATION...");
             try {
+                // Utilisation de no-cors car Google Apps Script ne renvoie pas toujours les bons headers
                 await fetch(`${SCRIPT_URL}?action=sendTicket&uuid=${uuid}&key=${key}`, { mode: 'no-cors' });
-                setTimeout(loadData, 1500);
-            } catch(e) { alert("Erreur."); }
+                alert("Action lancée ! La liste va s'actualiser.");
+                setTimeout(loadData, 2000);
+            } catch(e) { alert("Erreur lors de la validation."); }
+            hideLoader();
         }
 
         function sendWhatsApp(phone, nom) {
             let cleanPhone = phone.replace(/\D/g, '');
-            if (cleanPhone.length === 8) cleanPhone = "237" + cleanPhone;
-            const msg = `Salut ${nom} ! 🏀 Ton paiement est validé. Voici ton ticket pour Hoopers Vibes S2.`;
+            if (cleanPhone.length === 9) cleanPhone = "237" + cleanPhone; // Ajustement Cameroun si 9 chiffres
+            const msg = `Salut ${nom} ! 🏀 Ton paiement pour Hoopers Vibes S2 a été bien reçu. On se voit sur le terrain !`;
             window.open(`https://wa.me/${cleanPhone}?text=${encodeURIComponent(msg)}`, '_blank');
         }
+
+        function showLoader(text) { 
+            const l = document.getElementById('loading');
+            l.innerText = text;
+            l.style.display = 'block'; 
+        }
+        function hideLoader() { document.getElementById('loading').style.display = 'none'; }
     </script>
 </body>
 </html>
+
