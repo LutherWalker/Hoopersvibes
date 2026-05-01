@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ADMIN HOOPERS S2 | Final Pro</title>
     <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
+    <!-- Librairie pour transformer le HTML en Image -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
         :root {
@@ -24,7 +25,7 @@
         .login-card h1 { font-family: 'Bebas Neue'; font-size: 3rem; color: var(--orange-hoop); margin-bottom: 20px; }
         input[type="password"] { width: 100%; padding: 15px; background: #222; border: 1px solid #333; color: white; margin-bottom: 20px; font-size: 1rem; text-align: center; }
 
-        /* Sidebar */
+        /* Sidebar & Navigation */
         .sidebar {
             width: var(--sidebar-width); height: 100vh; background: #000; padding: 30px 20px; border-right: 1px solid #333; 
             position: fixed; left: 0; top: 0; transform: translateX(-100%); transition: transform 0.4s; z-index: 1000;
@@ -36,7 +37,7 @@
         .sidebar-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 998; display: none; }
         .sidebar-overlay.active { display: block; }
 
-        /* UI */
+        /* UI Elements */
         .menu-toggle { position: fixed; left: 15px; top: 15px; z-index: 999; background: var(--orange-hoop); border: none; color: white; width: 45px; height: 45px; border-radius: 5px; cursor: pointer; font-size: 1.2rem; }
         .main-content { flex: 1; padding: 70px 15px 40px; width: 100%; max-width: 1200px; margin: 0 auto; display: none; }
         .header-main { margin-bottom: 30px; text-align: center; }
@@ -83,6 +84,7 @@
 
         #loading { position: fixed; top: 15px; right: 15px; background: var(--orange-hoop); color: white; padding: 10px 20px; display: none; z-index: 5000; font-weight: bold; border-radius: 4px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
 
+        /* Responsive */
         @media (max-width: 768px) {
             .stats-grid { grid-template-columns: repeat(2, 1fr); }
             thead { display: none; }
@@ -95,6 +97,7 @@
 </head>
 <body>
 
+    <!-- AUTHENTICATION -->
     <div id="login-overlay">
         <div class="login-card">
             <h1>ADMIN S2</h1>
@@ -103,6 +106,7 @@
         </div>
     </div>
 
+    <!-- TICKET MODAL -->
     <div id="ticket-modal">
         <div class="ticket-box" id="ticket-to-export">
             <h2 style="font-family:'Bebas Neue';color:var(--orange-hoop);font-size:2.2rem;">HOOPERS VIBES S2</h2>
@@ -112,6 +116,7 @@
             <p id="t-detail" style="font-size:0.9rem; color:#444;"></p>
             <div class="ticket-footer">Pass officiel - Hoopers Vibes 2026</div>
         </div>
+        
         <div class="modal-buttons">
             <button class="btn btn-validate" onclick="downloadTicket()">TÉLÉCHARGER (PNG)</button>
             <button id="share-btn" class="btn btn-share" style="display:none;" onclick="shareTicket()">PARTAGER DIRECTEMENT</button>
@@ -156,7 +161,7 @@
         <div class="table-wrapper">
             <table>
                 <thead>
-                    <tr><th>Participant</th><th>Type</th><th>Détails</th><th>Statut</th><th>Actions</th></tr>
+                    <tr><th>Participant</th><th>Catégorie</th><th>Détails</th><th>Statut</th><th>Actions</th></tr>
                 </thead>
                 <tbody id="table-body"></tbody>
             </table>
@@ -197,10 +202,12 @@
                     renderDashboard(rawData);
                     document.getElementById('last-update').innerText = "Mis à jour à " + new Date().toLocaleTimeString();
                 } else { 
-                    alert("Accès refusé."); 
+                    alert("Accès refusé : Code incorrect."); 
                     logout(); 
                 }
-            } catch (e) { alert("Erreur de connexion."); }
+            } catch (e) { 
+                alert("Erreur de connexion au serveur."); 
+            }
             hideLoader();
         }
 
@@ -209,6 +216,7 @@
             tbody.innerHTML = '';
             let paidCount = 0; let ca = 0; let guests = 0;
             
+            // Tri : Non-payés en premier
             const sortedData = [...data].sort((a,b) => {
                 const aP = (a.paid === true || a.paid === "true");
                 const bP = (b.paid === true || b.paid === "true");
@@ -220,19 +228,16 @@
                 if (isPaid) { paidCount++; ca += parseInt(item.montant || 0); }
                 if (item.type?.toLowerCase() !== 'player') guests++;
 
-                // On gère le nom du joueur ou le nom de l'équipe (3v3)
-                const displayName = item.nom || item.equipenom || "Sans Nom";
                 const row = document.createElement('tr');
-                
                 row.innerHTML = `
-                    <td><span class="mobile-label">Nom</span><div><b>${displayName}</b><br><small>${item.phone}</small></div></td>
+                    <td><span class="mobile-label">Nom</span><div><b>${item.nom}</b><br><small>${item.phone}</small></div></td>
                     <td><span class="mobile-label">Type</span><span class="badge" style="background:#444; color:white;">${(item.type||'').toUpperCase()}</span></td>
                     <td><span class="mobile-label">Détails</span>${item.competition || item.passtype || '-'}</td>
                     <td><span class="mobile-label">Statut</span><span class="badge ${isPaid ? 'badge-paid' : 'badge-unpaid'}">${isPaid ? 'PAYÉ' : 'EN ATTENTE'}</span></td>
                     <td>
                         <div class="action-group">
-                            <button class="btn btn-ticket" onclick="showTicket('${item.uuid}', '${item.ticketid}', '${displayName}', '${item.competition || item.passtype}')">TICKET</button>
-                            <button class="btn btn-whatsapp" onclick="sendWhatsApp('${item.phone}', '${displayName}')">WA</button>
+                            <button class="btn btn-ticket" onclick="showTicket('${item.uuid}', '${item.ticketid}', '${item.nom}', '${item.competition || item.passtype}')">TICKET</button>
+                            <button class="btn btn-whatsapp" onclick="sendWhatsApp('${item.phone}', '${item.nom}')">WA</button>
                         </div>
                         ${!isPaid ? `<button class="btn btn-validate" onclick="markAsPaid('${item.uuid}')">VALIDER LE PAIEMENT</button>` : ''}
                     </td>
@@ -250,7 +255,6 @@
             const val = document.getElementById('search-input').value.toLowerCase();
             const filtered = rawData.filter(i => 
                 (i.nom && i.nom.toLowerCase().includes(val)) || 
-                (i.equipenom && i.equipenom.toLowerCase().includes(val)) ||
                 (i.phone && i.phone.includes(val)) || 
                 (i.ticketid && i.ticketid.toLowerCase().includes(val))
             );
@@ -259,23 +263,28 @@
 
         function showTicket(uuid, id, nom, detail) {
             const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${uuid}`;
-            document.getElementById('qr-display').innerHTML = `<img src="${qrUrl}" alt="QR">`;
+            document.getElementById('qr-display').innerHTML = `<img src="${qrUrl}" alt="QR Code">`;
             document.getElementById('t-id').innerText = id || 'HV-PENDING';
             document.getElementById('t-name').innerText = nom;
             document.getElementById('t-detail').innerText = detail;
             document.getElementById('ticket-modal').style.display = 'flex';
+            
+            // Afficher bouton partage si mobile compatible
             if (navigator.share) { document.getElementById('share-btn').style.display = 'block'; }
         }
 
         async function downloadTicket() {
             const ticket = document.getElementById('ticket-to-export');
             const name = document.getElementById('t-name').innerText;
-            showLoader("IMAGE...");
-            const canvas = await html2canvas(ticket, { scale: 2, backgroundColor: "#ffffff", useCORS: true });
-            const link = document.createElement('a');
-            link.download = `Ticket_${name}.png`;
-            link.href = canvas.toDataURL("image/png");
-            link.click();
+            showLoader("CRÉATION DU TICKET...");
+            
+            try {
+                const canvas = await html2canvas(ticket, { scale: 2, backgroundColor: "#ffffff", useCORS: true });
+                const link = document.createElement('a');
+                link.download = `Ticket_Hoopers_${name.replace(/\s+/g, '_')}.png`;
+                link.href = canvas.toDataURL("image/png");
+                link.click();
+            } catch (e) { alert("Erreur lors de la génération."); }
             hideLoader();
         }
 
@@ -284,31 +293,29 @@
             const canvas = await html2canvas(ticket, { scale: 2, backgroundColor: "#ffffff", useCORS: true });
             canvas.toBlob(async (blob) => {
                 const file = new File([blob], 'ticket.png', { type: 'image/png' });
-                try { await navigator.share({ files: [file], title: 'Ticket Hoopers' }); } catch (e) {}
+                try {
+                    await navigator.share({ files: [file], title: 'Ticket Hoopers Vibes' });
+                } catch (e) { console.log("Partage annulé"); }
             });
         }
 
         async function markAsPaid(uuid) {
-            if (!confirm("Confirmer le paiement ?")) return;
+            if (!confirm("Confirmer la réception du paiement ?\nCeci enverra le ticket par email automatiquement.")) return;
             const key = sessionStorage.getItem('hv_admin_key');
             showLoader("VALIDATION...");
-            await fetch(`${SCRIPT_URL}?action=sendTicket&uuid=${uuid}&key=${key}`, { mode: 'no-cors' });
-            setTimeout(loadData, 2000);
+            try {
+                // Utilisation de no-cors car Google Apps Script ne renvoie pas toujours les bons headers
+                await fetch(`${SCRIPT_URL}?action=sendTicket&uuid=${uuid}&key=${key}`, { mode: 'no-cors' });
+                alert("Action lancée ! La liste va s'actualiser.");
+                setTimeout(loadData, 2000);
+            } catch(e) { alert("Erreur lors de la validation."); }
             hideLoader();
         }
 
         function sendWhatsApp(phone, nom) {
-            // Nettoyage complet : on garde que les chiffres
-            let cleanPhone = phone.toString().replace(/\D/g, '');
-            
-            // Gestion auto indicatif Cameroun (237)
-            if (cleanPhone.length === 9) {
-                cleanPhone = "237" + cleanPhone;
-            } else if (cleanPhone.startsWith('00')) {
-                cleanPhone = cleanPhone.substring(2);
-            }
-            
-            const msg = `Salut ${nom} ! 🏀 Ton inscription pour Hoopers Vibes S2 a été bien reçue. On attend ton paiement pour valider ton ticket !`;
+            let cleanPhone = phone.replace(/\D/g, '');
+            if (cleanPhone.length === 9) cleanPhone = "237" + cleanPhone; // Ajustement Cameroun si 9 chiffres
+            const msg = `Salut ${nom} ! 🏀 Ton paiement pour Hoopers Vibes S2 a été bien reçu. On se voit sur le terrain !`;
             window.open(`https://wa.me/${cleanPhone}?text=${encodeURIComponent(msg)}`, '_blank');
         }
 
@@ -321,5 +328,6 @@
     </script>
 </body>
 </html>
+
 
 
