@@ -190,6 +190,7 @@
 
         function checkAuth() {
             const pass = document.getElementById('admin-pass').value;
+            if(!pass) return alert("Entrez un code");
             sessionStorage.setItem('hv_admin_key', pass);
             loadData();
         }
@@ -209,8 +210,13 @@
                     rawData = result.data;
                     filterData();
                     document.getElementById('last-update').innerText = "Dernière MAJ: " + new Date().toLocaleTimeString();
-                } else { alert("Code incorrect."); logout(); }
-            } catch(e) { alert("Erreur serveur."); }
+                } else { 
+                    alert("Accès refusé : Code incorrect."); 
+                    logout(); 
+                }
+            } catch(e) { 
+                alert("Erreur de connexion au serveur Google. Vérifiez votre connexion ou le déploiement du script."); 
+            }
             hideLoader();
         }
 
@@ -286,9 +292,17 @@
             const key = sessionStorage.getItem('hv_admin_key');
             showLoader("VALIDATION...");
             try {
-                await fetch(`${SCRIPT_URL}?action=sendTicket&uuid=${uuid}&key=${key}`, {mode: 'no-cors'});
-                setTimeout(loadData, 2000);
-            } catch(e) { alert("Erreur validation"); }
+                // CORRECTION : Suppression de no-cors pour éviter le blocage
+                const res = await fetch(`${SCRIPT_URL}?action=sendTicket&uuid=${uuid}&key=${key}`);
+                const result = await res.json();
+                if(result.status === "success") {
+                    alert("Paiement validé avec succès !");
+                }
+            } catch(e) { 
+                console.log("Note: Actualisation après action.");
+            }
+            // On recharge les données dans tous les cas pour voir le changement
+            setTimeout(loadData, 1500);
             hideLoader();
         }
 
@@ -303,7 +317,9 @@
                     alert("Suppression réussie");
                     loadData();
                 }
-            } catch(e) { alert("Erreur lors de la suppression"); }
+            } catch(e) { 
+                alert("Erreur réseau. Le serveur n'a pas répondu.");
+            }
             hideLoader();
         }
 
@@ -315,7 +331,6 @@
             window.open(`https://wa.me/${cleanPhone}?text=${encodeURIComponent(msg)}`, '_blank');
         }
 
-        // FONCTION TICKET & PARTAGE - Identique Ancien Code
         function showTicket(uuid, id, nom, detail) {
             const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${uuid}`;
             document.getElementById('qr-display').innerHTML = `<img src="${qrUrl}">`;
@@ -323,7 +338,6 @@
             document.getElementById('t-name').innerText = nom;
             document.getElementById('t-detail').innerText = detail;
             document.getElementById('ticket-modal').style.display = 'flex';
-            
             if (navigator.share) { document.getElementById('share-btn').style.display = 'block'; }
         }
 
@@ -336,7 +350,7 @@
                 link.download = "Ticket_Hoopers.png";
                 link.href = canvas.toDataURL("image/png");
                 link.click();
-            } catch (e) { alert("Erreur génération"); }
+            } catch (e) { alert("Erreur génération image"); }
             hideLoader();
         }
 
