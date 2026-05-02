@@ -24,7 +24,7 @@
         .login-card h1 { font-family: 'Bebas Neue'; font-size: 3rem; color: var(--orange-hoop); margin-bottom: 20px; }
         input[type="password"] { width: 100%; padding: 15px; background: #222; border: 1px solid #333; color: white; margin-bottom: 20px; font-size: 1rem; text-align: center; border-radius: 5px; outline: none; }
 
-        /* Sidebar */
+        /* Sidebar - Identique Ancien Code */
         .sidebar { width: var(--sidebar-width); height: 100vh; background: #000; padding: 30px 20px; border-right: 1px solid #333; position: fixed; left: 0; top: 0; transform: translateX(-100%); transition: transform 0.4s; z-index: 1000; }
         .sidebar.open { transform: translateX(0); }
         .sidebar h2 { font-family: 'Bebas Neue'; color: var(--orange-hoop); margin-bottom: 40px; font-size: 2rem; }
@@ -62,6 +62,13 @@
         th { background: #222; padding: 15px; text-align: left; font-family: 'Bebas Neue'; color: var(--orange-hoop); font-weight: normal; letter-spacing: 1px; }
         td { padding: 15px; border-bottom: 1px solid #222; font-size: 0.9rem; }
 
+        /* Modal Ticket - Structure Ancien Code */
+        #ticket-modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 3000; justify-content: center; align-items: center; padding: 20px; flex-direction: column; }
+        .ticket-box { background: #fff; color: #000; padding: 30px; text-align: center; width: 100%; max-width: 350px; border-radius: 15px; box-shadow: 0 10px 40px rgba(0,0,0,0.8); }
+        #qr-display { margin: 15px 0; display: flex; justify-content: center; }
+        #qr-display img { width: 180px; height: 180px; }
+        .ticket-footer { margin-top: 15px; border-top: 1px dashed #ccc; padding-top: 10px; font-size: 0.7rem; color: #666; text-transform: uppercase; }
+
         /* Badges & Buttons */
         .badge { padding: 4px 10px; border-radius: 20px; font-size: 0.7rem; font-weight: bold; }
         .badge-paid { background: #2ecc71; color: white; }
@@ -72,16 +79,12 @@
         .btn-ticket { background: #3498db; color: white; }
         .btn-whatsapp { background: #25d366; color: white; }
         .btn-delete { background: #e74c3c; color: white; }
+        .btn-share { background: #8e44ad; color: white; }
         
         .action-group { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px; }
         .btn-full { grid-column: span 2; margin-top: 4px; }
+        .modal-buttons { width: 100%; max-width: 350px; margin-top: 20px; display: grid; gap: 10px; }
 
-        /* Ticket Modal */
-        #ticket-modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 3000; justify-content: center; align-items: center; padding: 20px; flex-direction: column; }
-        .ticket-box { background: #fff; color: #000; padding: 30px; text-align: center; width: 100%; max-width: 350px; border-radius: 15px; }
-        #qr-display { margin: 15px 0; display: flex; justify-content: center; }
-        #qr-display img { width: 180px; height: 180px; }
-        
         #loading { position: fixed; top: 15px; right: 15px; background: var(--orange-hoop); color: white; padding: 10px 20px; display: none; z-index: 5000; font-weight: bold; border-radius: 4px; }
 
         @media (max-width: 768px) {
@@ -104,17 +107,20 @@
         </div>
     </div>
 
-    <!-- TICKET MODAL -->
+    <!-- TICKET MODAL - Structure & Design Ancien Code -->
     <div id="ticket-modal">
         <div class="ticket-box" id="ticket-to-export">
             <h2 style="font-family:'Bebas Neue';color:var(--orange-hoop);font-size:2.2rem;">HOOPERS VIBES S2</h2>
             <div id="qr-display"></div>
-            <h3 id="t-id" style="font-family:'Bebas Neue';font-size:1.8rem;"></h3>
-            <p id="t-name" style="font-weight:700; font-size:1.1rem;"></p>
-            <p id="t-detail" style="font-size:0.9rem; color:#666;"></p>
+            <h3 id="t-id" style="font-family:'Bebas Neue';font-size:1.8rem; letter-spacing:1px;"></h3>
+            <p id="t-name" style="font-weight:700; font-size:1.1rem; margin:5px 0;"></p>
+            <p id="t-detail" style="font-size:0.9rem; color:#444;"></p>
+            <div class="ticket-footer">Pass officiel - Hoopers Vibes 2026</div>
         </div>
-        <div style="width:100%; max-width:350px; margin-top:20px; display:grid; gap:10px;">
-            <button class="btn btn-validate" onclick="downloadTicket()">TÉLÉCHARGER</button>
+        
+        <div class="modal-buttons">
+            <button class="btn btn-validate" onclick="downloadTicket()">TÉLÉCHARGER (PNG)</button>
+            <button id="share-btn" class="btn btn-share" style="display:none;" onclick="shareTicket()">PARTAGER DIRECTEMENT</button>
             <button class="btn btn-delete" onclick="document.getElementById('ticket-modal').style.display='none'">FERMER</button>
         </div>
     </div>
@@ -124,11 +130,15 @@
     <button class="menu-toggle" onclick="toggleSidebar()">☰</button>
     <div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleSidebar()"></div>
 
+    <!-- SIDEBAR - Identique Ancien Code -->
     <aside class="sidebar" id="sidebar">
         <h2>HOOPERS VIBES</h2>
         <a href="#" class="nav-item active">DASHBOARD</a>
         <a href="scanner.html" class="nav-item">SCANNER QR</a>
-        <button class="btn btn-delete" style="margin-top:20px" onclick="logout()">DÉCONNEXION</button>
+        <a href="index.html" class="nav-item">RETOUR SITE</a>
+        <div style="position: absolute; bottom: 30px; left: 20px; width: calc(100% - 40px);">
+            <button class="btn btn-delete" onclick="logout()">DÉCONNEXION</button>
+        </div>
     </aside>
 
     <main class="main-content" id="main-ui">
@@ -145,7 +155,6 @@
             <div class="stat-card"><h3>Recettes (CFA)</h3><p id="stat-ca">0</p></div>
         </div>
 
-        <!-- FILTRES PAR CATÉGORIE -->
         <div class="filter-tabs">
             <button class="filter-btn active" onclick="setQuickFilter('all', this)">TOUS</button>
             <button class="filter-btn" onclick="setQuickFilter('1v1', this)">1V1</button>
@@ -238,7 +247,6 @@
             tbody.innerHTML = '';
             let paidCount = 0; let ca = 0; let guests = 0;
 
-            // Calcul sur la donnée brute pour les stats globales
             rawData.forEach(item => {
                 const isPaid = (item.paid === true || item.paid === "TRUE" || item.paid === "true");
                 if (isPaid) { paidCount++; ca += parseInt(item.montant || 0); }
@@ -307,6 +315,7 @@
             window.open(`https://wa.me/${cleanPhone}?text=${encodeURIComponent(msg)}`, '_blank');
         }
 
+        // FONCTION TICKET & PARTAGE - Identique Ancien Code
         function showTicket(uuid, id, nom, detail) {
             const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${uuid}`;
             document.getElementById('qr-display').innerHTML = `<img src="${qrUrl}">`;
@@ -314,15 +323,32 @@
             document.getElementById('t-name').innerText = nom;
             document.getElementById('t-detail').innerText = detail;
             document.getElementById('ticket-modal').style.display = 'flex';
+            
+            if (navigator.share) { document.getElementById('share-btn').style.display = 'block'; }
         }
 
         async function downloadTicket() {
             const el = document.getElementById('ticket-to-export');
-            const canvas = await html2canvas(el);
-            const link = document.createElement('a');
-            link.download = "Ticket_Hoopers.png";
-            link.href = canvas.toDataURL();
-            link.click();
+            showLoader("CRÉATION DU TICKET...");
+            try {
+                const canvas = await html2canvas(el, { scale: 2, backgroundColor: "#ffffff", useCORS: true });
+                const link = document.createElement('a');
+                link.download = "Ticket_Hoopers.png";
+                link.href = canvas.toDataURL("image/png");
+                link.click();
+            } catch (e) { alert("Erreur génération"); }
+            hideLoader();
+        }
+
+        async function shareTicket() {
+            const ticket = document.getElementById('ticket-to-export');
+            const canvas = await html2canvas(ticket, { scale: 2, backgroundColor: "#ffffff", useCORS: true });
+            canvas.toBlob(async (blob) => {
+                const file = new File([blob], 'ticket.png', { type: 'image/png' });
+                try {
+                    await navigator.share({ files: [file], title: 'Ticket Hoopers Vibes' });
+                } catch (e) { console.log("Partage annulé"); }
+            });
         }
 
         function showLoader(t) { const l=document.getElementById('loading'); l.innerText=t; l.style.display='block'; }
@@ -330,3 +356,4 @@
     </script>
 </body>
 </html>
+
