@@ -24,7 +24,7 @@
         .login-card h1 { font-family: 'Bebas Neue'; font-size: 3rem; color: var(--orange-hoop); margin-bottom: 20px; }
         input[type="password"] { width: 100%; padding: 15px; background: #222; border: 1px solid #333; color: white; margin-bottom: 20px; font-size: 1rem; text-align: center; border-radius: 5px; outline: none; }
 
-        /* Sidebar - Identique Ancien Code */
+        /* Sidebar */
         .sidebar { width: var(--sidebar-width); height: 100vh; background: #000; padding: 30px 20px; border-right: 1px solid #333; position: fixed; left: 0; top: 0; transform: translateX(-100%); transition: transform 0.4s; z-index: 1000; }
         .sidebar.open { transform: translateX(0); }
         .sidebar h2 { font-family: 'Bebas Neue'; color: var(--orange-hoop); margin-bottom: 40px; font-size: 2rem; }
@@ -62,7 +62,7 @@
         th { background: #222; padding: 15px; text-align: left; font-family: 'Bebas Neue'; color: var(--orange-hoop); font-weight: normal; letter-spacing: 1px; }
         td { padding: 15px; border-bottom: 1px solid #222; font-size: 0.9rem; }
 
-        /* Modal Ticket - Structure Ancien Code */
+        /* Modal Ticket */
         #ticket-modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 3000; justify-content: center; align-items: center; padding: 20px; flex-direction: column; }
         .ticket-box { background: #fff; color: #000; padding: 30px; text-align: center; width: 100%; max-width: 350px; border-radius: 15px; box-shadow: 0 10px 40px rgba(0,0,0,0.8); }
         #qr-display { margin: 15px 0; display: flex; justify-content: center; }
@@ -98,7 +98,6 @@
 </head>
 <body>
 
-    <!-- AUTHENTICATION -->
     <div id="login-overlay">
         <div class="login-card">
             <h1>ADMIN S2</h1>
@@ -107,7 +106,6 @@
         </div>
     </div>
 
-    <!-- TICKET MODAL - Structure & Design Ancien Code -->
     <div id="ticket-modal">
         <div class="ticket-box" id="ticket-to-export">
             <h2 style="font-family:'Bebas Neue';color:var(--orange-hoop);font-size:2.2rem;">HOOPERS VIBES S2</h2>
@@ -130,7 +128,6 @@
     <button class="menu-toggle" onclick="toggleSidebar()">☰</button>
     <div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleSidebar()"></div>
 
-    <!-- SIDEBAR - Identique Ancien Code -->
     <aside class="sidebar" id="sidebar">
         <h2>HOOPERS VIBES</h2>
         <a href="#" class="nav-item active">DASHBOARD</a>
@@ -215,7 +212,7 @@
                     logout(); 
                 }
             } catch(e) { 
-                alert("Erreur de connexion au serveur Google. Vérifiez votre connexion ou le déploiement du script."); 
+                alert("Erreur de connexion au serveur Google."); 
             }
             hideLoader();
         }
@@ -231,7 +228,7 @@
             const searchVal = document.getElementById('search-input').value.toLowerCase();
             let filtered = rawData.filter(i => {
                 const name = (i.nom || i.equipenom || '').toLowerCase();
-                const phone = (i.phone || '').toString();
+                const phone = (i.phone || i.téléphone || '').toString();
                 const matchesSearch = name.includes(searchVal) || phone.includes(searchVal);
                 
                 let matchesCat = true;
@@ -262,17 +259,18 @@
             data.forEach(item => {
                 const isPaid = (item.paid === true || item.paid === "TRUE" || item.paid === "true");
                 const displayName = item.nom || item.equipenom || "Participant";
+                const displayPhone = item.phone || item.téléphone || '';
                 
                 const row = document.createElement('tr');
                 row.innerHTML = `
-                    <td><span class="mobile-label">Participant</span><div><b>${displayName}</b><br><small>${item.phone || ''}</small></div></td>
+                    <td><span class="mobile-label">Participant</span><div><b>${displayName}</b><br><small>${displayPhone}</small></div></td>
                     <td><span class="mobile-label">Type</span><span class="badge" style="background:#444; color:white;">${(item.type||'').toUpperCase()}</span></td>
                     <td><span class="mobile-label">Détails</span>${item.competition || item.passtype || '-'}</td>
                     <td><span class="mobile-label">Statut</span><span class="badge ${isPaid ? 'badge-paid' : 'badge-unpaid'}">${isPaid ? 'PAYÉ' : 'ATTENTE'}</span></td>
                     <td>
                         <div class="action-group">
                             <button class="btn btn-ticket" onclick="showTicket('${item.uuid}', '${item.ticketid}', '${displayName}', '${item.competition || item.passtype}')">TICKET</button>
-                            <button class="btn btn-whatsapp" onclick="sendWhatsApp('${item.phone}', '${displayName}', ${isPaid})">WA</button>
+                            <button class="btn btn-whatsapp" onclick="sendWhatsApp('${displayPhone}', '${displayName}', ${isPaid})">WA</button>
                             ${!isPaid ? `<button class="btn btn-validate btn-full" onclick="markAsPaid('${item.uuid}')">VALIDER</button>` : ''}
                             <button class="btn btn-delete btn-full" onclick="deleteEntry('${item.uuid}', '${displayName}')">SUPPRIMER</button>
                         </div>
@@ -288,46 +286,33 @@
         }
 
         async function markAsPaid(uuid) {
-            if(!confirm("Valider ce paiement ? Un email sera envoyé.")) return;
+            if(!confirm("Valider ce paiement ?")) return;
             const key = sessionStorage.getItem('hv_admin_key');
             showLoader("VALIDATION...");
             try {
-                // CORRECTION : Suppression de no-cors pour éviter le blocage
-                const res = await fetch(`${SCRIPT_URL}?action=sendTicket&uuid=${uuid}&key=${key}`);
-                const result = await res.json();
-                if(result.status === "success") {
-                    alert("Paiement validé avec succès !");
-                }
-            } catch(e) { 
-                console.log("Note: Actualisation après action.");
-            }
-            // On recharge les données dans tous les cas pour voir le changement
-            setTimeout(loadData, 1500);
+                await fetch(`${SCRIPT_URL}?action=sendTicket&uuid=${uuid}&key=${key}`, { mode: 'no-cors' });
+                setTimeout(loadData, 1500);
+            } catch(e) { console.log("Note: Actualisation forcée."); setTimeout(loadData, 1000); }
             hideLoader();
         }
 
         async function deleteEntry(uuid, nom) {
-            if(!confirm(`Supprimer définitivement ${nom} ? Cette action est irréversible.`)) return;
+            if(!confirm(`Supprimer ${nom} ?`)) return;
             const key = sessionStorage.getItem('hv_admin_key');
             showLoader("SUPPRESSION...");
             try {
-                const res = await fetch(`${SCRIPT_URL}?action=delete&uuid=${uuid}&key=${key}`);
-                const result = await res.json();
-                if(result.status === "success") {
-                    alert("Suppression réussie");
-                    loadData();
-                }
-            } catch(e) { 
-                alert("Erreur réseau. Le serveur n'a pas répondu.");
-            }
+                await fetch(`${SCRIPT_URL}?action=delete&uuid=${uuid}&key=${key}`, { mode: 'no-cors' });
+                setTimeout(loadData, 1000);
+            } catch(e) { setTimeout(loadData, 1000); }
             hideLoader();
         }
 
         function sendWhatsApp(phone, nom, isPaid) {
             if(!phone) return alert("Numéro manquant");
             let cleanPhone = phone.toString().replace(/\D/g, '');
+            // Correction automatique du préfixe Cameroun (237)
             if(cleanPhone.length === 9) cleanPhone = "237" + cleanPhone;
-            const msg = isPaid ? `Salut ${nom} ! Ton paiement Hoopers Vibes S2 est validé. Voici ton accès !` : `Salut ${nom} ! Ton inscription Hoopers Vibes S2 est bien reçue. On attend ton paiement !`;
+            const msg = isPaid ? `Salut ${nom} ! 🏀 Ton paiement Hoopers Vibes S2 est validé. Voici ton accès !` : `Salut ${nom} ! 🏀 Ton inscription Hoopers Vibes S2 est bien reçue. On attend ton paiement !`;
             window.open(`https://wa.me/${cleanPhone}?text=${encodeURIComponent(msg)}`, '_blank');
         }
 
