@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ADMIN HOOPERS S2 | Final Pro</title>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <style>
+        :root {
+            --orange-hoop: #ff4500;
+            --black-asphalt: #0f0f0f;
+            --dark-gray: #1a1a1a;
+            --white: #ffffff;
+            --sidebar-width: 250px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Montserrat', sans-serif; background: var(--black-asphalt); color: var(--white); display: flex; min-height: 100vh; overflow-x: hidden; }
+
+        /* Login */
+        #login-overlay { position: fixed; inset: 0; background: var(--black-asphalt); display: flex; justify-content: center; align-items: center; z-index: 4000; }
+        .login-card { background: var(--dark-gray); padding: 40px; border: 2px solid var(--orange-hoop); text-align: center; width: 90%; max-width: 380px; }
+        .login-card h1 { font-family: 'Bebas Neue'; font-size: 3rem; color: var(--orange-hoop); margin-bottom: 20px; }
+        input[type="password"] { width: 100%; padding: 15px; background: #222; border: 1px solid #333; color: white; margin-bottom: 20px; font-size: 1rem; text-align: center; border-radius: 5px; outline: none; }
+
+        /* Sidebar */
+        .sidebar { width: var(--sidebar-width); height: 100vh; background: #000; padding: 30px 20px; border-right: 1px solid #333; position: fixed; left: 0; top: 0; transform: translateX(-100%); transition: transform 0.4s; z-index: 1000; }
+        .sidebar.open { transform: translateX(0); }
+        .sidebar h2 { font-family: 'Bebas Neue'; color: var(--orange-hoop); margin-bottom: 40px; font-size: 2rem; }
+        .nav-item { padding: 15px; color: #aaa; text-decoration: none; display: block; font-family: 'Bebas Neue'; font-size: 1.2rem; transition: 0.3s; margin-bottom: 5px; border-radius: 4px; }
+        .nav-item:hover, .nav-item.active { color: white; background: var(--orange-hoop); }
+        .sidebar-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 998; display: none; }
+        .sidebar-overlay.active { display: block; }
+
+        /* UI Elements */
+        .menu-toggle { position: fixed; left: 15px; top: 15px; z-index: 999; background: var(--orange-hoop); border: none; color: white; width: 45px; height: 45px; border-radius: 5px; cursor: pointer; font-size: 1.2rem; }
+        .main-content { flex: 1; padding: 70px 15px 40px; width: 100%; max-width: 1200px; margin: 0 auto; display: none; }
+        .header-main { margin-bottom: 30px; text-align: center; }
+        .header-main h1 { font-family: 'Bebas Neue'; font-size: 2.5rem; letter-spacing: 2px; }
+
+        /* Catégories Filtres */
+        .filter-tabs { display: flex; gap: 8px; margin-bottom: 20px; overflow-x: auto; padding-bottom: 10px; scrollbar-width: none; }
+        .filter-tabs::-webkit-scrollbar { display: none; }
+        .filter-btn { background: #222; border: 1px solid #333; color: #888; padding: 10px 20px; border-radius: 25px; cursor: pointer; font-family: 'Bebas Neue'; font-size: 0.9rem; white-space: nowrap; transition: 0.3s; letter-spacing: 1px; }
+        .filter-btn.active { background: var(--orange-hoop); color: white; border-color: var(--orange-hoop); }
+
+        /* Stats Grid */
+        .stats-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 25px; }
+        .stat-card { background: var(--dark-gray); padding: 15px; border-radius: 5px; border-bottom: 3px solid var(--orange-hoop); text-align: center; }
+        .stat-card h3 { font-size: 0.7rem; color: #888; text-transform: uppercase; margin-bottom: 5px; }
+        .stat-card p { font-family: 'Bebas Neue'; font-size: 1.8rem; color: var(--orange-hoop); }
+
+        /* Search */
+        .search-container { margin-bottom: 20px; position: relative; }
+        .search-container input { width: 100%; padding: 15px 15px 15px 45px; background: var(--dark-gray); border: 1px solid #333; border-radius: 8px; color: white; font-size: 1rem; outline: none; }
+        .search-icon { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: #666; }
+
+        /* Table */
+        .table-wrapper { background: var(--dark-gray); border-radius: 8px; overflow: hidden; }
+        table { width: 100%; border-collapse: collapse; }
+        th { background: #222; padding: 15px; text-align: left; font-family: 'Bebas Neue'; color: var(--orange-hoop); font-weight: normal; letter-spacing: 1px; }
+        td { padding: 15px; border-bottom: 1px solid #222; font-size: 0.9rem; }
+
+        /* Modal Ticket */
+        #ticket-modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 3000; justify-content: center; align-items: center; padding: 20px; flex-direction: column; }
+        .ticket-box { background: #fff; color: #000; padding: 30px; text-align: center; width: 100%; max-width: 350px; border-radius: 15px; box-shadow: 0 10px 40px rgba(0,0,0,0.8); }
+        #qr-display { margin: 15px 0; display: flex; justify-content: center; }
+        #qr-display img { width: 180px; height: 180px; }
+        .ticket-footer { margin-top: 15px; border-top: 1px dashed #ccc; padding-top: 10px; font-size: 0.7rem; color: #666; text-transform: uppercase; }
+
+        /* Badges & Buttons */
+        .badge { padding: 4px 10px; border-radius: 20px; font-size: 0.7rem; font-weight: bold; }
+        .badge-paid { background: #2ecc71; color: white; }
+        .badge-unpaid { background: #e67e22; color: white; }
+        
+        .btn { padding: 12px; border: none; cursor: pointer; font-family: 'Bebas Neue'; font-size: 1rem; border-radius: 5px; transition: 0.2s; width: 100%; letter-spacing: 1px; }
+        .btn-validate { background: #2ecc71; color: white; }
+        .btn-ticket { background: #3498db; color: white; }
+        .btn-whatsapp { background: #25d366; color: white; }
+        .btn-delete { background: #e74c3c; color: white; }
+        .btn-share { background: #8e44ad; color: white; }
+        
+        .action-group { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px; }
+        .btn-full { grid-column: span 2; margin-top: 4px; }
+        .modal-buttons { width: 100%; max-width: 350px; margin-top: 20px; display: grid; gap: 10px; }
+
+        #loading { position: fixed; top: 15px; right: 15px; background: var(--orange-hoop); color: white; padding: 10px 20px; display: none; z-index: 5000; font-weight: bold; border-radius: 4px; }
+
+        @media (max-width: 768px) {
+            thead { display: none; }
+            tr { display: block; background: var(--dark-gray); margin-bottom: 15px; border: 1px solid #333; border-radius: 8px; padding: 15px; }
+            td { display: flex; justify-content: space-between; align-items: center; border: none; padding: 8px 0; border-bottom: 1px solid #222; }
+            td:last-child { display: block; border: none; padding-top: 15px; }
+            .mobile-label { font-weight: bold; color: var(--orange-hoop); font-size: 0.7rem; text-transform: uppercase; }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="login-overlay">
+        <div class="login-card">
+            <h1>ADMIN S2</h1>
+            <input type="password" id="admin-pass" placeholder="CODE D'ACCÈS">
+            <button class="btn btn-validate" onclick="checkAuth()">ENTRER</button>
+        </div>
+    </div>
+
+    <div id="ticket-modal">
+        <div class="ticket-box" id="ticket-to-export">
+            <h2 style="font-family:'Bebas Neue';color:var(--orange-hoop);font-size:2.2rem;">HOOPERS VIBES S2</h2>
+            <div id="qr-display"></div>
+            <h3 id="t-id" style="font-family:'Bebas Neue';font-size:1.8rem; letter-spacing:1px;"></h3>
+            <p id="t-name" style="font-weight:700; font-size:1.1rem; margin:5px 0;"></p>
+            <p id="t-detail" style="font-size:0.9rem; color:#444;"></p>
+            <div class="ticket-footer">Pass officiel - Hoopers Vibes 2026</div>
+        </div>
+        
+        <div class="modal-buttons">
+            <button class="btn btn-validate" onclick="downloadTicket()">TÉLÉCHARGER (PNG)</button>
+            <button id="share-btn" class="btn btn-share" style="display:none;" onclick="shareTicket()">PARTAGER DIRECTEMENT</button>
+            <button class="btn btn-delete" onclick="document.getElementById('ticket-modal').style.display='none'">FERMER</button>
+        </div>
+    </div>
+
+    <div id="loading">TRAITEMENT EN COURS...</div>
+
+    <button class="menu-toggle" onclick="toggleSidebar()">☰</button>
+    <div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleSidebar()"></div>
+
+    <aside class="sidebar" id="sidebar">
+        <h2>HOOPERS VIBES</h2>
+        <a href="#" class="nav-item active">DASHBOARD</a>
+        <a href="scanner.html" class="nav-item">SCANNER QR</a>
+        <a href="index.html" class="nav-item">RETOUR SITE</a>
+        <div style="position: absolute; bottom: 30px; left: 20px; width: calc(100% - 40px);">
+            <button class="btn btn-delete" onclick="logout()">DÉCONNEXION</button>
+        </div>
+    </aside>
+
+    <main class="main-content" id="main-ui">
+        <div class="header-main">
+            <h1>DASHBOARD ADMIN</h1>
+            <p id="last-update" style="font-size: 0.8rem; color: #666;"></p>
+            <button class="btn btn-validate" style="width:auto; margin-top:10px; padding:8px 25px;" onclick="loadData()">ACTUALISER</button>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-card"><h3>Total inscrits</h3><p id="stat-total">0</p></div>
+            <div class="stat-card"><h3>Déjà payés</h3><p id="stat-paid">0</p></div>
+            <div class="stat-card"><h3>Spectateurs</h3><p id="stat-guests">0</p></div>
+            <div class="stat-card"><h3>Recettes (CFA)</h3><p id="stat-ca">0</p></div>
+        </div>
+
+        <div class="filter-tabs">
+            <button class="filter-btn active" onclick="setQuickFilter('all', this)">TOUS</button>
+            <button class="filter-btn" onclick="setQuickFilter('1v1', this)">1V1</button>
+            <button class="filter-btn" onclick="setQuickFilter('3v3', this)">3V3</button>
+            <button class="filter-btn" onclick="setQuickFilter('3pts', this)">3PTS</button>
+            <button class="filter-btn" onclick="setQuickFilter('visiteur', this)">VISITEURS</button>
+        </div>
+
+        <div class="search-container">
+            <span class="search-icon">🔍</span>
+            <input type="text" id="search-input" placeholder="Rechercher nom, téléphone..." oninput="filterData()">
+        </div>
+
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr><th>Participant</th><th>Catégorie</th><th>Détails</th><th>Statut</th><th>Actions</th></tr>
+                </thead>
+                <tbody id="table-body"></tbody>
+            </table>
+        </div>
+    </main>
+
+    <script>
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxn45nDZJHvcGZnez4iwDEDL4xSWfcv4q7krJOXgFME5mKv2sRN06okQS_vz85j55BH/exec";
+        let rawData = [];
+        let currentQuickFilter = 'all';
+
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('open');
+            document.getElementById('sidebar-overlay').classList.toggle('active');
+        }
+
+        function checkAuth() {
+            const pass = document.getElementById('admin-pass').value;
+            if(!pass) return alert("Entrez un code");
+            sessionStorage.setItem('hv_admin_key', pass);
+            loadData();
+        }
+
+        function logout() { sessionStorage.removeItem('hv_admin_key'); location.reload(); }
+
+        async function loadData() {
+            const key = sessionStorage.getItem('hv_admin_key');
+            if(!key) return;
+            showLoader("SYNCHRONISATION...");
+            try {
+                const res = await fetch(`${SCRIPT_URL}?action=getData&key=${key}`);
+                const result = await res.json();
+                if(result.status === "success") {
+                    document.getElementById('login-overlay').style.display = 'none';
+                    document.getElementById('main-ui').style.display = 'block';
+                    rawData = result.data;
+                    filterData();
+                    document.getElementById('last-update').innerText = "Dernière MAJ: " + new Date().toLocaleTimeString();
+                } else { 
+                    alert("Accès refusé : Code incorrect."); 
+                    logout(); 
+                }
+            } catch(e) { 
+                alert("Erreur de connexion au serveur Google."); 
+            }
+            hideLoader();
+        }
+
+        function setQuickFilter(cat, btn) {
+            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            currentQuickFilter = cat;
+            filterData();
+        }
+
+        function filterData() {
+            const searchVal = document.getElementById('search-input').value.toLowerCase();
+            let filtered = rawData.filter(i => {
+                const name = (i.nom || i.equipenom || '').toLowerCase();
+                const phone = (i.phone || i.téléphone || '').toString();
+                const matchesSearch = name.includes(searchVal) || phone.includes(searchVal);
+                
+                let matchesCat = true;
+                const comp = (i.competition || '').toLowerCase();
+                const type = (i.type || '').toLowerCase();
+                
+                if(currentQuickFilter === '1v1') matchesCat = comp.includes('1v1');
+                else if(currentQuickFilter === '3v3') matchesCat = comp.includes('3v3');
+                else if(currentQuickFilter === '3pts') matchesCat = comp.includes('3pts');
+                else if(currentQuickFilter === 'visiteur') matchesCat = !type.includes('player');
+                
+                return matchesSearch && matchesCat;
+            });
+            renderDashboard(filtered);
+        }
+
+        function renderDashboard(data) {
+            const tbody = document.getElementById('table-body');
+            tbody.innerHTML = '';
+            let paidCount = 0; let ca = 0; let guests = 0;
+
+            rawData.forEach(item => {
+                const isPaid = (item.paid === true || item.paid === "TRUE" || item.paid === "true");
+                if (isPaid) { paidCount++; ca += parseInt(item.montant || 0); }
+                if ((item.type||'').toLowerCase() !== 'player') guests++;
+            });
+
+            data.forEach(item => {
+                const isPaid = (item.paid === true || item.paid === "TRUE" || item.paid === "true");
+                const displayName = item.nom || item.equipenom || "Participant";
+                const displayPhone = item.phone || item.téléphone || '';
+                
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td><span class="mobile-label">Participant</span><div><b>${displayName}</b><br><small>${displayPhone}</small></div></td>
+                    <td><span class="mobile-label">Type</span><span class="badge" style="background:#444; color:white;">${(item.type||'').toUpperCase()}</span></td>
+                    <td><span class="mobile-label">Détails</span>${item.competition || item.passtype || '-'}</td>
+                    <td><span class="mobile-label">Statut</span><span class="badge ${isPaid ? 'badge-paid' : 'badge-unpaid'}">${isPaid ? 'PAYÉ' : 'ATTENTE'}</span></td>
+                    <td>
+                        <div class="action-group">
+                            <button class="btn btn-ticket" onclick="showTicket('${item.uuid}', '${item.ticketid}', '${displayName}', '${item.competition || item.passtype}')">TICKET</button>
+                            <button class="btn btn-whatsapp" onclick="sendWhatsApp('${displayPhone}', '${displayName}', ${isPaid})">WA</button>
+                            ${!isPaid ? `<button class="btn btn-validate btn-full" onclick="markAsPaid('${item.uuid}')">VALIDER</button>` : ''}
+                            <button class="btn btn-delete btn-full" onclick="deleteEntry('${item.uuid}', '${displayName}')">SUPPRIMER</button>
+                        </div>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+
+            document.getElementById('stat-total').innerText = rawData.length;
+            document.getElementById('stat-paid').innerText = paidCount;
+            document.getElementById('stat-guests').innerText = guests;
+            document.getElementById('stat-ca').innerText = ca.toLocaleString();
+        }
+
+        async function markAsPaid(uuid) {
+            if(!confirm("Valider ce paiement ?")) return;
+            const key = sessionStorage.getItem('hv_admin_key');
+            showLoader("VALIDATION...");
+            try {
+                await fetch(`${SCRIPT_URL}?action=sendTicket&uuid=${uuid}&key=${key}`, { mode: 'no-cors' });
+                setTimeout(loadData, 1500);
+            } catch(e) { console.log("Note: Actualisation forcée."); setTimeout(loadData, 1000); }
+            hideLoader();
+        }
+
+        async function deleteEntry(uuid, nom) {
+            if(!confirm(`Supprimer ${nom} ?`)) return;
+            const key = sessionStorage.getItem('hv_admin_key');
+            showLoader("SUPPRESSION...");
+            try {
+                await fetch(`${SCRIPT_URL}?action=delete&uuid=${uuid}&key=${key}`, { mode: 'no-cors' });
+                setTimeout(loadData, 1000);
+            } catch(e) { setTimeout(loadData, 1000); }
+            hideLoader();
+        }
+
+        function sendWhatsApp(phone, nom, isPaid) {
+            if(!phone) return alert("Numéro manquant");
+            let cleanPhone = phone.toString().replace(/\D/g, '');
+            // Correction automatique du préfixe Cameroun (237)
+            if(cleanPhone.length === 9) cleanPhone = "237" + cleanPhone;
+            const msg = isPaid ? `Salut ${nom} ! 🏀 Ton paiement Hoopers Vibes S2 est validé. Voici ton accès !` : `Salut ${nom} ! 🏀 Ton inscription Hoopers Vibes S2 est bien reçue. On attend ton paiement !`;
+            window.open(`https://wa.me/${cleanPhone}?text=${encodeURIComponent(msg)}`, '_blank');
+        }
+
+        function showTicket(uuid, id, nom, detail) {
+            const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${uuid}`;
+            document.getElementById('qr-display').innerHTML = `<img src="${qrUrl}">`;
+            document.getElementById('t-id').innerText = id || 'HV-WAITING';
+            document.getElementById('t-name').innerText = nom;
+            document.getElementById('t-detail').innerText = detail;
+            document.getElementById('ticket-modal').style.display = 'flex';
+            if (navigator.share) { document.getElementById('share-btn').style.display = 'block'; }
+        }
+
+        async function downloadTicket() {
+            const el = document.getElementById('ticket-to-export');
+            showLoader("CRÉATION DU TICKET...");
+            try {
+                const canvas = await html2canvas(el, { scale: 2, backgroundColor: "#ffffff", useCORS: true });
+                const link = document.createElement('a');
+                link.download = "Ticket_Hoopers.png";
+                link.href = canvas.toDataURL("image/png");
+                link.click();
+            } catch (e) { alert("Erreur génération image"); }
+            hideLoader();
+        }
+
+        async function shareTicket() {
+            const ticket = document.getElementById('ticket-to-export');
+            const canvas = await html2canvas(ticket, { scale: 2, backgroundColor: "#ffffff", useCORS: true });
+            canvas.toBlob(async (blob) => {
+                const file = new File([blob], 'ticket.png', { type: 'image/png' });
+                try {
+                    await navigator.share({ files: [file], title: 'Ticket Hoopers Vibes' });
+                } catch (e) { console.log("Partage annulé"); }
+            });
+        }
+
+        function showLoader(t) { const l=document.getElementById('loading'); l.innerText=t; l.style.display='block'; }
+        function hideLoader() { document.getElementById('loading').style.display='none'; }
+    </script>
+</body>
+</html>
