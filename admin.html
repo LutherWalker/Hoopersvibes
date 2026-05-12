@@ -312,7 +312,20 @@
             let cleanPhone = phone.toString().replace(/\D/g, '');
             // Correction automatique du préfixe Cameroun (237)
             if(cleanPhone.length === 9) cleanPhone = "237" + cleanPhone;
-            const msg = isPaid ? `Salut ${nom} ! 🏀 Ton paiement Hoopers Vibes S2 est validé. Voici ton accès !` : `Salut ${nom} ! 🏀 Ton inscription Hoopers Vibes S2 est bien reçue. On attend ton paiement !`;
+            const msg = isPaid ? `Salut ${nom} ! 🏀 Ton paiement Hoopers Vibes S2 est validé. Voici ton accès !` : `Salut ${nom} ! 🏀 Votre requête / inscription pour HOOPERS VIBES S2 a bien été reçue ✅
+
+Afin de valider définitivement votre participation, nous vous invitons à finaliser votre paiement via les numéros ci-dessous :
+
+🟠 Orange Money : _688373609_
+Nom:TALLA DANIEL
+🟡 MTN MoMo : 651567133
+Nom :DANIEL TALLA
+
+⚠️ Après paiement, veuillez envoyer la preuve de transaction pour confirmation.
+
+📌 Un QR code vous sera envoyé d’ici peu.
+
+Merci pour votre confiance et rendez-vous à HOOPERS VIBES S2 🔥🎮`;
             window.open(`https://wa.me/${cleanPhone}?text=${encodeURIComponent(msg)}`, '_blank');
         }
 
